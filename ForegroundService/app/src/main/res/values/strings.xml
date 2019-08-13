@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ForegroundService</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="bind">Bind</string>
+    <string name="unbind">Unbind</string>
+    <string name="hello_world_notification_title">Hello World!</string>
+    <string name="hello_world_notification_message">Great day for golf!</string>
+    <string name="hello_world_ticker_text">yeaaaaaaaaaaaaaaaaap</string>
+    <string name="golf_service_channel">Hello World Notification</string>
+    <string name="golf_service_channel_description">Where we ask the user to play golf</string>
+</resources>
