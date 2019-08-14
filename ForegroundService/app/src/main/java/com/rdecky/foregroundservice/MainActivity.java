@@ -1,16 +1,37 @@
 package com.rdecky.foregroundservice;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
     private Context context;
+    private boolean golfServiceBound;
+    GolfService golfService;
+    private TextView displayArea;
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            GolfService.GolfBinder binder = (GolfService.GolfBinder) service;
+            golfService = binder.getService();
+            golfServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            golfServiceBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,14 +39,45 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         this.context = this;
 
-        final Button startService = findViewById(R.id.startService);
+        Button startService = findViewById(R.id.startService);
         setStartServiceListener(startService);
 
         Button bindService = findViewById(R.id.bindService);
-        Button unbindService = findViewById(R.id.unbindService);
+        setBindServiceListener(bindService);
 
-        final Button stopService = findViewById(R.id.stopService);
+        Button unbindService = findViewById(R.id.unbindService);
+        setUnbindServiceListener(unbindService);
+
+        Button stopService = findViewById(R.id.stopService);
         setStopServiceListener(stopService);
+
+        Button getGolfClub = findViewById(R.id.getGolfClub);
+        setGetGolfClubListener(getGolfClub);
+
+        displayArea = findViewById(R.id.displayArea);
+
+        Button clearDisplay = findViewById(R.id.clearDisplay);
+        setClearDisplayListener(clearDisplay);
+    }
+
+    private void setClearDisplayListener(Button clearDisplay) {
+        clearDisplay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayArea.setText("");
+            }
+        });
+    }
+
+    private void setGetGolfClubListener(Button getGolfClub) {
+        getGolfClub.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(golfServiceBound) {
+                    displayArea.append(golfService.getGolfClub() + "\n");
+                }
+            }
+        });
     }
 
     private void setStopServiceListener(Button stopService) {
@@ -44,6 +96,26 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(context, GolfService.class);
                 startService(intent);
+            }
+        });
+    }
+
+    private void setBindServiceListener(final Button bindService) {
+        bindService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, GolfService.class);
+                bindService(intent, connection, Context.BIND_AUTO_CREATE);
+            }
+        });
+    }
+
+    private void setUnbindServiceListener(final Button unbindService) {
+        unbindService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                unbindService(connection);
+                golfServiceBound = false;
             }
         });
     }

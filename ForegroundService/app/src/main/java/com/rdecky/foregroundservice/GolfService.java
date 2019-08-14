@@ -5,19 +5,29 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
+import java.util.Random;
+
 public class GolfService extends Service {
 
     public static final String TAG = GolfService.class.getSimpleName();
+    private final IBinder binder = new GolfBinder();
+    private final Random random = new Random();
+
+    class GolfBinder extends Binder {
+        GolfService getService() {
+            return GolfService.this;
+        }
+    }
 
     @Override
     public void onDestroy() {
         Log.v(TAG, "onDestroy()");
-        super.onDestroy();
     }
 
     private static final String CHANNEL_ID = "GolfServiceChannel";
@@ -26,7 +36,6 @@ public class GolfService extends Service {
     @Override
     public void onCreate() {
         Log.v(TAG, "onCreate()");
-        super.onCreate();
     }
 
     @Override
@@ -34,14 +43,24 @@ public class GolfService extends Service {
         Log.v(TAG, "onStartCommand()");
         startInForeground();
         return START_NOT_STICKY;
-        //return START_STICKY;
-        //return START_REDELIVER_INTENT;
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         Log.v(TAG, "onBind()");
-        return null;
+        return binder;
+    }
+
+    public String getGolfClub() {
+        int club = random.nextInt(9);
+        if(club == 0) {
+            return "Pitching Wedge";
+        }
+        if(club <= 3) {
+            return club + " wood";
+        }
+
+        return club + " iron";
     }
 
     private void startInForeground() {

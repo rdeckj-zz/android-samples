@@ -9,4 +9,6 @@
     <string name="hello_world_ticker_text">yeaaaaaaaaaaaaaaaaap</string>
     <string name="golf_service_channel">Hello World Notification</string>
     <string name="golf_service_channel_description">Where we ask the user to play golf</string>
+    <string name="getGolfClub">Get golf club</string>
+    <string name="clearDisplay">Clear display</string>
 </resources>
