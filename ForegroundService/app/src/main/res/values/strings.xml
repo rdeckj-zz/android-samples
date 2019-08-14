@@ -11,4 +11,5 @@
     <string name="golf_service_channel_description">Where we ask the user to play golf</string>
     <string name="getGolfClub">Get golf club</string>
     <string name="clearDisplay">Clear display</string>
+    <string name="ANR">ANR</string>
 </resources>

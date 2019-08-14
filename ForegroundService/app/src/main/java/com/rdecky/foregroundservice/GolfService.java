@@ -51,6 +51,13 @@ public class GolfService extends Service {
         return binder;
     }
 
+    public int calcFib(int number) {
+        if(number <= 1) {
+            return number;
+        }
+        return calcFib(number - 2) + calcFib(number - 1);
+    }
+
     public String getGolfClub() {
         int club = random.nextInt(9);
         if(club == 0) {

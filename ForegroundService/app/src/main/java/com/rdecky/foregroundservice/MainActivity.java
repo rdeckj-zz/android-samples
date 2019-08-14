@@ -54,10 +54,22 @@ public class MainActivity extends AppCompatActivity {
         Button getGolfClub = findViewById(R.id.getGolfClub);
         setGetGolfClubListener(getGolfClub);
 
+        Button ANR = findViewById(R.id.anr);
+        setANRListener(ANR);
+
         displayArea = findViewById(R.id.displayArea);
 
         Button clearDisplay = findViewById(R.id.clearDisplay);
         setClearDisplayListener(clearDisplay);
+    }
+
+    private void setANRListener(Button anr) {
+        anr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayArea.setText(golfService.calcFib(20));
+            }
+        });
     }
 
     private void setClearDisplayListener(Button clearDisplay) {
