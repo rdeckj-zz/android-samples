@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -13,6 +14,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final String TAG = "*" + MainActivity.class.getSimpleName();
 
     private Context context;
     private boolean golfServiceBound;
@@ -22,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
+            Log.v(TAG, "onServiceConnected");
             GolfService.GolfBinder binder = (GolfService.GolfBinder) service;
             golfService = binder.getService();
             golfServiceBound = true;
@@ -29,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
+            Log.v(TAG, "onServiceDisconnected");
             golfServiceBound = false;
         }
     };
@@ -67,7 +72,9 @@ public class MainActivity extends AppCompatActivity {
         anr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                displayArea.setText(golfService.calcFib(20));
+                if(golfServiceBound) {
+                    displayArea.append("Long calculation: " + golfService.calcFib(50) + "\n");
+                }
             }
         });
     }

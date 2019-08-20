@@ -15,7 +15,12 @@ import java.util.Random;
 
 public class GolfService extends Service {
 
-    public static final String TAG = GolfService.class.getSimpleName();
+    public static final String TAG = "*" + GolfService.class.getSimpleName();
+    private static final String CHANNEL_ID = "GolfServiceChannel";
+    private static final int NOTIFICATION_ID = 1;
+
+    boolean allowRebinding = true;
+
     private final IBinder binder = new GolfBinder();
     private final Random random = new Random();
 
@@ -24,14 +29,6 @@ public class GolfService extends Service {
             return GolfService.this;
         }
     }
-
-    @Override
-    public void onDestroy() {
-        Log.v(TAG, "onDestroy()");
-    }
-
-    private static final String CHANNEL_ID = "GolfServiceChannel";
-    private static final int NOTIFICATION_ID = 1;
 
     @Override
     public void onCreate() {
@@ -51,8 +48,29 @@ public class GolfService extends Service {
         return binder;
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.v(TAG, "onUnbind()");
+        return allowRebinding;
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        Log.v(TAG, "onRebind()");
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.v(TAG, "onDestroy()");
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        Log.v(TAG, "onTrimMemory()");
+    }
+
     public int calcFib(int number) {
-        if(number <= 1) {
+        if (number <= 1) {
             return number;
         }
         return calcFib(number - 2) + calcFib(number - 1);
@@ -60,10 +78,10 @@ public class GolfService extends Service {
 
     public String getGolfClub() {
         int club = random.nextInt(9);
-        if(club == 0) {
+        if (club == 0) {
             return "Pitching Wedge";
         }
-        if(club <= 3) {
+        if (club <= 3) {
             return club + " wood";
         }
 
@@ -79,12 +97,12 @@ public class GolfService extends Service {
 
     private Notification getNotification() {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_golf_course)
-                    .setContentTitle("Lets go golfing!")
-                    .setContentText("It's a FOREground service, after all...")
-                    .setStyle(new NotificationCompat.BigTextStyle()
-                            .bigText("It's a FOREground service, after all..."))
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setSmallIcon(R.drawable.ic_golf_course)
+                .setContentTitle("Lets go golfing!")
+                .setContentText("It's a FOREground service, after all...")
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText("It's a FOREground service, after all..."))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .build();
     }
 
