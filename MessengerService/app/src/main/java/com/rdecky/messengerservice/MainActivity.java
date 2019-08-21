@@ -1,11 +1,15 @@
-package com.rdecky.foregroundservice;
+package com.rdecky.messengerservice;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,25 +22,47 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "*" + MainActivity.class.getSimpleName();
 
     private Context context;
-    private boolean golfServiceBound;
-    GolfService golfService;
-    private TextView displayArea;
+    private boolean numberServiceBound;
+    Messenger numberService;
+    private static TextView displayArea;
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.v(TAG, "onServiceConnected");
-            GolfService.GolfBinder binder = (GolfService.GolfBinder) service;
-            golfService = binder.getService();
-            golfServiceBound = true;
+            numberService = new Messenger(service);
+            numberServiceBound = true;
+
+            try {
+                Message msg = Message.obtain(null, NumberService.MSG_REGISTER_CLIENT);
+                msg.replyTo = messenger;
+                numberService.send(msg);
+
+            } catch (RemoteException e) {
+                //The service isn't there
+            }
+
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             Log.v(TAG, "onServiceDisconnected");
-            golfServiceBound = false;
+            numberServiceBound = false;
         }
     };
+
+    static class IncomingMessageHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == NumberService.MSG_RESPONSE) {
+                displayArea.append(msg.arg1 + "\n");
+            } else {
+                super.handleMessage(msg);
+            }
+        }
+    }
+
+    final Messenger messenger = new Messenger(new IncomingMessageHandler());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,20 +70,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         this.context = this;
 
-        Button startService = findViewById(R.id.startService);
-        setStartServiceListener(startService);
-
         Button bindService = findViewById(R.id.bindService);
         setBindServiceListener(bindService);
 
         Button unbindService = findViewById(R.id.unbindService);
         setUnbindServiceListener(unbindService);
 
-        Button stopService = findViewById(R.id.stopService);
-        setStopServiceListener(stopService);
-
-        Button getGolfClub = findViewById(R.id.getGolfClub);
-        setGetGolfClubListener(getGolfClub);
+        Button getRandomNumber = findViewById(R.id.getRandomNumber);
+        setRandomNumberListener(getRandomNumber);
 
         Button ANR = findViewById(R.id.anr);
         setANRListener(ANR);
@@ -72,8 +92,13 @@ public class MainActivity extends AppCompatActivity {
         anr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(golfServiceBound) {
-                    displayArea.append("Long calculation: " + golfService.calcFib(42) + "\n");
+                if (numberServiceBound) {
+                    Message message = Message.obtain(null, NumberService.MSG_GET_FIB, 0, 0);
+                    try {
+                        numberService.send(message);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -88,33 +113,18 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setGetGolfClubListener(Button getGolfClub) {
-        getGolfClub.setOnClickListener(new View.OnClickListener() {
+    private void setRandomNumberListener(Button getRandomNumber) {
+        getRandomNumber.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(golfServiceBound) {
-                    displayArea.append(golfService.getGolfClub() + "\n");
+                if (numberServiceBound) {
+                    Message message = Message.obtain(null, NumberService.MSG_GET_NUMBER, 0, 0);
+                    try {
+                        numberService.send(message);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
-    }
-
-    private void setStopServiceListener(Button stopService) {
-        stopService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, GolfService.class);
-                stopService(intent);
-            }
-        });
-    }
-
-    private void setStartServiceListener(Button startService) {
-        startService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, GolfService.class);
-                startService(intent);
             }
         });
     }
@@ -123,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         bindService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(context, GolfService.class);
+                Intent intent = new Intent(context, NumberService.class);
                 bindService(intent, connection, Context.BIND_AUTO_CREATE);
             }
         });
@@ -134,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 unbindService(connection);
-                golfServiceBound = false;
+                numberServiceBound = false;
             }
         });
     }

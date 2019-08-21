@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">MessengerService</string>
+    <string name="bind">Bind</string>
+    <string name="unbind">Unbind</string>
+    <string name="getRandomNumber">Get random number</string>
+    <string name="clearDisplay">Clear display</string>
+    <string name="ANR">ANR</string>
+</resources>
